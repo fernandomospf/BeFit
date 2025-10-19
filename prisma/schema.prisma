@@ -10,7 +10,7 @@ datasource db {
 
 /**
  * ---------------------------
- * Tabelas
+ * Table
  * ----------------------------
  */
 
@@ -66,48 +66,37 @@ model UserProgress {
 }
 
 model Workout {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String             @id @default(uuid())
+  userId      String             @map("user_id")
+  user        User               @relation(fields: [userId], references: [id])
   name        String
-  dayOfWeek   String   @map("day_of_week")
-  muscleGroup String?  @map("muscle_group")
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
-
-  exercises WorkoutExercise[]
-  sessions  WorkoutSession[]
-
-  @@index([userId])
-  @@map("workouts")
+  dayOfWeek   String             @map("day_of_week")
+  muscleGroup String?            @map("muscle_group")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+  exercises   WorkoutExercise[]
+  sessions    WorkoutSession[]
 }
 
 model WorkoutExercise {
   id        String   @id @default(uuid())
   workoutId String   @map("workout_id")
-  workout   Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  workout   Workout  @relation(fields: [workoutId], references: [id])
   name      String
   sets      Int      @default(3)
   reps      Int      @default(10)
   notes     String?
   createdAt DateTime @default(now()) @map("created_at")
-
-  @@index([workoutId])
-  @@map("workout_exercises")
 }
 
 model WorkoutSession {
-  id            String   @id @default(uuid())
-  userId        String   @map("user_id")
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  workoutId     String?  @map("workout_id")
-  workout       Workout? @relation(fields: [workoutId], references: [id], onDelete: SetNull)
-  sessionDate   DateTime @map("session_date")
-  totalDuration Int?     @map("total_duration")
+  id            String    @id @default(uuid())
+  userId        String    @map("user_id")
+  user          User      @relation(fields: [userId], references: [id])
+  workoutId     String?   @map("workout_id")
+  workout       Workout?  @relation(fields: [workoutId], references: [id])
+  sessionDate   DateTime  @map("session_date")
+  totalDuration Int?      @map("total_duration")
   notes         String?
-  createdAt     DateTime @default(now()) @map("created_at")
-
-  @@index([userId])
-  @@index([workoutId])
-  @@map("workout_sessions")
+  createdAt     DateTime  @default(now()) @map("created_at")
 }
