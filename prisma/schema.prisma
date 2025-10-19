@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+/**
+ * ---------------------------
+ * Tabelas
+ * ----------------------------
+ */
+
+model User {
+  id            String   @id @default(uuid())
+  email         String?  @unique
+  name          String?
+  avatarUrl     String?
+  height        Decimal? @db.Decimal(5, 2)
+  currentWeight Decimal? @db.Decimal(5, 2)
+
+  isActive       Boolean  @default(true)
+  desactivatedAt  DateTime?
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  mealPlans MealPlan[]
+  progress  UserProgress[]
+  workouts  Workout[]
+  sessions  WorkoutSession[]
+}
+
+model MealPlan {
+  id           String   @id @default(uuid())
+  userId       String   @map("user_id")
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mealType     String   @map("meal_type")
+  optionNumber Int      @map("option_number")
+  description  String
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("meal_plans")
+}
+
+model UserProgress {
+  id         String   @id @default(uuid())
+  userId     String   @map("user_id")
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekNumber Int      @map("week_number")
+  weight     Decimal? @db.Decimal(5, 2)
+  bodyFat    Decimal? @map("body_fat") @db.Decimal(5, 2)
+  chest      Decimal? @db.Decimal(6, 2)
+  waist      Decimal? @db.Decimal(6, 2)
+  arm        Decimal? @db.Decimal(6, 2)
+  thigh      Decimal? @db.Decimal(6, 2)
+  photoUrl   String?  @map("photo_url")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("user_progress")
+}
+
+model Workout {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  dayOfWeek   String   @map("day_of_week")
+  muscleGroup String?  @map("muscle_group")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  exercises WorkoutExercise[]
+  sessions  WorkoutSession[]
+
+  @@index([userId])
+  @@map("workouts")
+}
+
+model WorkoutExercise {
+  id        String   @id @default(uuid())
+  workoutId String   @map("workout_id")
+  workout   Workout  @relation(fields: [workoutId], references: [id], onDelete: Cascade)
+  name      String
+  sets      Int      @default(3)
+  reps      Int      @default(10)
+  notes     String?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([workoutId])
+  @@map("workout_exercises")
+}
+
+model WorkoutSession {
+  id            String   @id @default(uuid())
+  userId        String   @map("user_id")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workoutId     String?  @map("workout_id")
+  workout       Workout? @relation(fields: [workoutId], references: [id], onDelete: SetNull)
+  sessionDate   DateTime @map("session_date")
+  totalDuration Int?     @map("total_duration")
+  notes         String?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([workoutId])
+  @@map("workout_sessions")
+}
