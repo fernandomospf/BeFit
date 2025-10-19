@@ -50,19 +50,33 @@ export class UsersService {
 
   createUser(data: Prisma.UserCreateInput) {
     if (!data) {
-      throw new BadRequestException('Dados do usuário são obrigatórios');
+      throw new BadRequestException('User data is required');
     }
     return this.prisma.user.create({ data });
   }
 
-  findById(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+  async findById(id: string) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    if (user.isActive === false) {
+      throw new NotFoundException('User desactivated');
+    }
+    return user;
   }
 
-  async findAll() {
-    const allUsers = await this.prisma.user.findMany();
-    const allUsersActive = allUsers.filter(user => user.isActive);
-    return allUsersActive;
+  async findAll(isActive?: string) {
+    if (isActive === undefined) {
+      return this.prisma.user.findMany({
+        where: { isActive: true },
+      });
+    }
+    const showActive = isActive === 'true';
+
+    return this.prisma.user.findMany({
+      where: { isActive: showActive },
+    });
   }
 
 }
