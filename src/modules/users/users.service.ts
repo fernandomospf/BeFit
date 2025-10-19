@@ -59,8 +59,10 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
-  findAll() {
-    return this.prisma.user.findMany();
+  async findAll() {
+    const allUsers = await this.prisma.user.findMany();
+    const allUsersActive = allUsers.filter(user => user.isActive);
+    return allUsersActive;
   }
 
 }
