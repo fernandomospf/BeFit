@@ -13,9 +13,14 @@ async function bootstrap() {
     .build();
 
   app.enableCors({
-    origin: ['https://befit-web-production.up.railway.app'],
+    origin: ['https://befit-web-production.up.railway.app'], 
+    methods: ['GET','HEAD','PUT','PATCH','POST','DELETE','OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: false,
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('docs', app, document);
   await app.listen(process.env.PORT ?? 8081);
